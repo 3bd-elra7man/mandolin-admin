@@ -21,6 +21,7 @@ import { useRouter } from "next/navigation"
 import React, { useState } from "react"
 import toast from "react-hot-toast"
 import Delete from "../custom ui/Delete"
+import Loader from "../custom ui/Loader"
 
 
 const formSchema = z.object({
@@ -36,7 +37,7 @@ const CollectionForm: React.FC<CollectionFormProps> = ({initialData}) => {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
 
-         const form = useForm<z.infer<typeof formSchema>>({
+    const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: initialData? initialData : {
       title: "",
@@ -44,6 +45,12 @@ const CollectionForm: React.FC<CollectionFormProps> = ({initialData}) => {
         image: "",
     },
   });
+
+  const handlekeypress = (e: React.KeyboardEvent<HTMLInputElement> | React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+    }
+  }
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try{
@@ -65,12 +72,14 @@ const CollectionForm: React.FC<CollectionFormProps> = ({initialData}) => {
     }
 }
 
-  return (
+  return ( loading ? (
+      <Loader />
+    ) : (
     <div className="p-10">
     {initialData ? (
       <div className="flex items-center justify-between">
           <p className="text-heading2-bold">Edit Collection</p>
-          <Delete id={initialData._id} />
+          <Delete item="collection" id={initialData._id} />
         </div>
       ) : (
          <p className="text-heading2-bold">Create Collection</p>
@@ -86,7 +95,7 @@ const CollectionForm: React.FC<CollectionFormProps> = ({initialData}) => {
             <FormItem>
               <FormLabel>Title</FormLabel>
               <FormControl>
-                <Input placeholder="Title" {...field} />
+                <Input placeholder="Title" {...field} onKeyDown={handlekeypress}/>
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -105,7 +114,7 @@ const CollectionForm: React.FC<CollectionFormProps> = ({initialData}) => {
             </FormItem>
           )}
         />
-                 <FormField
+        <FormField
           control={form.control}
           name="image"
           render={({ field }) => (
@@ -113,10 +122,11 @@ const CollectionForm: React.FC<CollectionFormProps> = ({initialData}) => {
               <FormLabel>Image</FormLabel>
               <FormControl>
                 <ImageUpload
-                    value={field.value ? [field.value] : []}
-                    onChange={(url) => field.onChange(url)}
-                    onRemove={() => field.onChange("")}
-                    />
+  multiple={false}
+  value={field.value ? [field.value] : []}
+  onChange={(urls) => field.onChange(urls[0])}
+  onRemove={() => field.onChange("")}
+/>
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -136,6 +146,7 @@ const CollectionForm: React.FC<CollectionFormProps> = ({initialData}) => {
     </Form>
     </div>
   )
+)
 }
 
 

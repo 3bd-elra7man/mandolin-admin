@@ -1,7 +1,6 @@
 "use client";
 
 import { Trash } from "lucide-react"
-import { Button } from "../ui/button"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -18,23 +17,25 @@ import toast from "react-hot-toast";
 import { useState } from "react";
 
 interface DeleteProps {
+  item: string;
   id: string;
 }
 
-const Delete: React.FC<DeleteProps> = ({ id }) => {
+const Delete: React.FC<DeleteProps> = ({ item, id }) => {
   const [loading, setLoading] = useState(false);
 
   const onDelete = async () => {
     try {
       setLoading(true)
-      const res = await fetch(`/api/collections/${id}`, {
+      const itemType = item === "product" ? "products" : "collections";
+      const res = await fetch(`/api/${itemType}/${id}`, {
         method: "DELETE",
       })
 
       if (res.ok) {
         setLoading(false)
-        window.location.href = (`/collections`)
-        toast.success("Collection deleted successfully!")
+        window.location.href = (`/${itemType}`)
+        toast.success(`${item} deleted successfully!`)
       }
     } catch (err) {
       console.log(err)
@@ -50,7 +51,7 @@ const Delete: React.FC<DeleteProps> = ({ id }) => {
     <AlertDialogHeader>
       <AlertDialogTitle className="text-red-1">Are you absolutely sure?</AlertDialogTitle>
       <AlertDialogDescription>
-        This action cannot be undone. This will permanently delete your collection.
+        This action cannot be undone. This will permanently delete your {item}.
       </AlertDialogDescription>
     </AlertDialogHeader>
     <AlertDialogFooter>

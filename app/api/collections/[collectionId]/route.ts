@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getAuth } from "@clerk/nextjs/server"; // Correct import
 
 import { connectToDB } from "@/lib/mongoDB";
 import Collection from "@/lib/models/Collection";
+import Product from "@/lib/models/Product";
+import { getAuth } from "@clerk/nextjs/server";
 
 export const GET = async (
   req: NextRequest,
@@ -11,7 +12,7 @@ export const GET = async (
   try {
     await connectToDB();
 
-    const collection = await Collection.findById(params.collectionId)
+    const collection = await Collection.findById(params.collectionId).populate({ path: "products", model: Product });
 
     if (!collection) {
       return new NextResponse(
@@ -67,7 +68,6 @@ export const POST = async (
   }
 };
 
-
 export const DELETE = async (
   req: NextRequest,
   { params }: { params: { collectionId: string } }
@@ -83,6 +83,11 @@ export const DELETE = async (
 
     await Collection.findByIdAndDelete(params.collectionId);
 
+    await Product.updateMany(
+      { collections: params.collectionId },
+      { $pull: { collections: params.collectionId } }
+    );
+    
     return new NextResponse("Collection is deleted", { status: 200 });
   } catch (err) {
     console.log("[collectionId_DELETE]", err);
