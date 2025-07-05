@@ -1,7 +1,7 @@
 "use client"
 
+import Loader from "@/components/custom ui/Loader"
 import ProductForm from "@/components/products/ProductForm"
-import { Loader } from "lucide-react"
 import { use, useEffect, useState } from "react"
 
 const ProductDetails = ({ params: paramsPromise }: { params: Promise<{ productId: string }> }) => {
